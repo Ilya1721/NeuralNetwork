@@ -16,17 +16,17 @@ namespace
 }  // namespace
 
 HiddenLayer::HiddenLayer(
-  size_t pointsCount,
+  size_t inputDimension,
+  size_t outputDimension,
   double yIntercept,
   double lineChangeRate,
-  size_t outputCount,
-  const std::function<int(double)>& sideOfLineFunc
+  const std::function<double(double)>& sideOfLineFunc
 )
 {
-  auto perceptronsCount = (2 / 3) * pointsCount + outputCount;
+  auto perceptronsCount = (2.0 / 3.0) * inputDimension + outputDimension;
   for (size_t i = 0; i < perceptronsCount; ++i)
   {
-    mPerceptrons.emplace_back(pointsCount, yIntercept, lineChangeRate, sideOfLineFunc);
+    mPerceptrons.emplace_back(inputDimension, yIntercept, lineChangeRate, sideOfLineFunc);
   }
 }
 
@@ -59,14 +59,14 @@ void HiddenLayer::backpropagate(
 }
 
 SingleLayerPerceptron::SingleLayerPerceptron(
-  size_t pointsCount, double yIntercept, double lineChangeRate, size_t outputCount
+  size_t inputDimension, size_t outputDimension, double yIntercept, double lineChangeRate
 )
-  : mLayer(pointsCount, yIntercept, lineChangeRate, outputCount, sigmoid),
-    mOutput(pointsCount, yIntercept, lineChangeRate, sigmoid)
+  : mLayer(inputDimension, outputDimension, yIntercept, lineChangeRate, sigmoid),
+    mOutput(inputDimension, yIntercept, lineChangeRate, sigmoid)
 {
 }
 
-int SingleLayerPerceptron::sideOfLineForPoint(const std::vector<double>& point) const
+double SingleLayerPerceptron::sideOfLineForPoint(const std::vector<double>& point) const
 {
   auto sidesOfLines = mLayer.sidesOfLinesForPoint(point);
   return mOutput.sideOfLineForPoint(sidesOfLines);
@@ -87,8 +87,8 @@ void SingleLayerPerceptron::train(
       double finalSideOfLine = mOutput.sideOfLineForPoint(sidesOfLine);
       auto sideOfLineDeviation = correctSidesOfLine[pointIdx] - finalSideOfLine;
       auto slopeChange = sideOfLineDeviation * sigmoidDerivative(finalSideOfLine);
-      mOutput.updateSlopeAndBias(point, slopeChange);
       mLayer.backpropagate(sidesOfLine, mOutput.getSlopes(), point, slopeChange);
+      mOutput.updateSlopeAndBias(point, slopeChange);
     }
   }
 }

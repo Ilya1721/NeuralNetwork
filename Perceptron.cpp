@@ -15,16 +15,16 @@ namespace
 }  // namespace
 
 Perceptron::Perceptron(
-  size_t pointsCount,
+  size_t pointCoordsCount,
   double yIntercept,
   double lineChangeRate,
-  const std::function<int(double)>& sideOfLineFunc
+  const std::function<double(double)>& sideOfLineFunc
 )
   : mYIntercept(yIntercept),
     mLineChangeRate(lineChangeRate),
     mSideOfLineFunc(sideOfLineFunc)
 {
-  mSlopes.resize(pointsCount);
+  mSlopes.resize(pointCoordsCount);
 }
 
 double Perceptron::sideOfLineForPoint(const std::vector<double>& point) const

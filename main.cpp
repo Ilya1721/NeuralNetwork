@@ -1,35 +1,34 @@
 #include <iostream>
 
-#include "Perceptron.h"
-
-int sideOfLine(double y)
-{
-  return y >= 0 ? 1 : 0;
-}
+#include "SingleLayerPerceptron.h"
 
 int main()
 {
-  // Training data
-  // [income, debt, creditScore, yearsAtJob]
-  std::vector<std::vector<double>> inputs = {
-    {0.9, 0.1, 0.9, 0.8},
-    {0.8, 0.2, 0.8, 0.7},
-    {0.2, 0.8, 0.3, 0.2},
-    {0.3, 0.7, 0.4, 0.3},
-    {0.7, 0.3, 0.7, 0.6}
+  // [income, debt, creditScore]
+  std::vector<std::vector<double>> applicants = {
+    {0.2, 0.8, 0.3},  // low income, high debt -> reject
+    {0.9, 0.2, 0.4},  // high income, low debt -> approve
+    {0.3, 0.4, 0.9},  // great credit score -> approve
+    {0.4, 0.7, 0.2},  // bad profile -> reject
+    {0.8, 0.3, 0.6},  // good profile -> approve
+    {0.3, 0.8, 0.8}   // high debt even with good score -> reject
   };
-  std::vector<double> labels = {1, 1, 0, 0, 1};
-  Perceptron p(inputs[0].size(), 0.0, 0.1, sideOfLine);
-  p.train(inputs, labels, 10);
+  std::vector<double> correctAnswers = {0, 1, 1, 0, 1, 0};
 
-  std::vector<double> applicant = {0.45, 0.25, 0.8, 0.6};
-  auto side = p.sideOfLineForPoint(applicant);
-  if (side == 1)
+  SingleLayerPerceptron slp(3, 1, 0.0, 0.1);
+  slp.train(applicants, correctAnswers, 5000);
+
+  std::vector<double> applicant = { 0.45, 0.4, 0.5 };
+  double sideOfLine = slp.sideOfLineForPoint(applicant);
+
+  if (sideOfLine > 0.5)
   {
-    std::cout << "Approved";
+    std::cout << "Loan APPROVED\n";
   }
   else
   {
-    std::cout << "Rejected";
+    std::cout << "Loan REJECTED\n";
   }
+
+  return 0;
 }

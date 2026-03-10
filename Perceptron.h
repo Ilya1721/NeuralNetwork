@@ -7,10 +7,10 @@ class Perceptron
 {
  public:
   Perceptron(
-    size_t pointsCount,
+    size_t pointCoordsCount,
     double yIntercept,
     double lineChangeRate,
-    const std::function<int(double)>& sideOfLineFunc
+    const std::function<double(double)>& sideOfLineFunc
   );
 
   double sideOfLineForPoint(const std::vector<double>& point) const;

@@ -6,11 +6,11 @@ class HiddenLayer
 {
  public:
   HiddenLayer(
-    size_t pointsCount,
+    size_t inputDimension,
+    size_t outputDimension,
     double yIntercept,
     double lineChangeRate,
-    size_t outputCount,
-    const std::function<int(double)>& sideOfLineFunc
+    const std::function<double(double)>& sideOfLineFunc
   );
 
   std::vector<double> sidesOfLinesForPoint(const std::vector<double>& point) const;
@@ -29,10 +29,13 @@ class SingleLayerPerceptron
 {
  public:
   SingleLayerPerceptron(
-    size_t pointsCount, double yIntercept, double lineChangeRate, size_t outputCount
+    size_t inputDimension,
+    size_t outputDimension,
+    double yIntercept,
+    double lineChangeRate
   );
 
-  int sideOfLineForPoint(const std::vector<double>& point) const;
+  double sideOfLineForPoint(const std::vector<double>& point) const;
   void train(
     const std::vector<std::vector<double>>& points,
     const std::vector<double>& correctSidesOfLine,
