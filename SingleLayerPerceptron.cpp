@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "ImprovementWatcher.h"
+
 namespace
 {
   double sigmoid(double y)
@@ -78,8 +80,10 @@ void SingleLayerPerceptron::train(
   int passesCount
 )
 {
-  for (int passIdx = 0; passIdx < passesCount; ++passIdx)
+  ImprovementWatcher watcher(10);
+  while (!watcher.improvementStopped())
   {
+    std::vector<double> finalSidesOfLine;
     for (size_t pointIdx = 0; pointIdx < points.size(); ++pointIdx)
     {
       const auto& point = points[pointIdx];
@@ -89,6 +93,8 @@ void SingleLayerPerceptron::train(
       auto slopeChange = sideOfLineDeviation * sigmoidDerivative(finalSideOfLine);
       mLayer.backpropagate(sidesOfLine, mOutput.getSlopes(), point, slopeChange);
       mOutput.updateSlopeAndBias(point, slopeChange);
+      finalSidesOfLine.push_back(finalSideOfLine);
     }
+    watcher.update(finalSidesOfLine, correctSidesOfLine);
   }
 }

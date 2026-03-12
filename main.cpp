@@ -18,7 +18,7 @@ int main()
   SingleLayerPerceptron slp(3, 1, 0.0, 0.1);
   slp.train(applicants, correctAnswers, 5000);
 
-  std::vector<double> applicant = { 0.45, 0.4, 0.5 };
+  std::vector<double> applicant = { 0.3, 0.4, 0.4 };
   double sideOfLine = slp.sideOfLineForPoint(applicant);
 
   if (sideOfLine > 0.5)
