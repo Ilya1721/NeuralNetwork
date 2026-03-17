@@ -72,11 +72,13 @@
   <ItemGroup>
     <ClCompile Include="ImprovementWatcher.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MultipleLayerPerceptron.cpp" />
     <ClCompile Include="SingleLayerPerceptron.cpp" />
     <ClCompile Include="Perceptron.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImprovementWatcher.h" />
+    <ClInclude Include="MultipleLayerPerceptron.h" />
     <ClInclude Include="SingleLayerPerceptron.h" />
     <ClInclude Include="Perceptron.h" />
   </ItemGroup>

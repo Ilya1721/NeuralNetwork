@@ -2,10 +2,10 @@
 
 #include "Perceptron.h"
 
-class HiddenLayer
+class SLPHiddenLayer
 {
  public:
-  HiddenLayer(
+  SLPHiddenLayer(
     size_t inputDimension,
     size_t outputDimension,
     double yIntercept,
@@ -38,11 +38,10 @@ class SingleLayerPerceptron
   double sideOfLineForPoint(const std::vector<double>& point) const;
   void train(
     const std::vector<std::vector<double>>& points,
-    const std::vector<double>& correctSidesOfLine,
-    int passesCount
+    const std::vector<double>& correctSidesOfLine
   );
 
  private:
-  HiddenLayer mLayer;
+  SLPHiddenLayer mLayer;
   Perceptron mOutput;
 };

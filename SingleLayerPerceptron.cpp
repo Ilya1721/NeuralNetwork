@@ -17,7 +17,7 @@ namespace
   }
 }  // namespace
 
-HiddenLayer::HiddenLayer(
+SLPHiddenLayer::SLPHiddenLayer(
   size_t inputDimension,
   size_t outputDimension,
   double yIntercept,
@@ -32,7 +32,7 @@ HiddenLayer::HiddenLayer(
   }
 }
 
-std::vector<double> HiddenLayer::sidesOfLinesForPoint(const std::vector<double>& point
+std::vector<double> SLPHiddenLayer::sidesOfLinesForPoint(const std::vector<double>& point
 ) const
 {
   std::vector<double> sidesOfLines;
@@ -44,7 +44,7 @@ std::vector<double> HiddenLayer::sidesOfLinesForPoint(const std::vector<double>&
   return sidesOfLines;
 }
 
-void HiddenLayer::backpropagate(
+void SLPHiddenLayer::backpropagate(
   const std::vector<double>& sidesOfLine,
   const std::vector<double>& outputSlopes,
   const std::vector<double>& point,
@@ -76,8 +76,7 @@ double SingleLayerPerceptron::sideOfLineForPoint(const std::vector<double>& poin
 
 void SingleLayerPerceptron::train(
   const std::vector<std::vector<double>>& points,
-  const std::vector<double>& correctSidesOfLine,
-  int passesCount
+  const std::vector<double>& correctSidesOfLine
 )
 {
   ImprovementWatcher watcher(10);

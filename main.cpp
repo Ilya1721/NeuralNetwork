@@ -16,9 +16,9 @@ int main()
   std::vector<double> correctAnswers = {0, 1, 1, 0, 1, 0};
 
   SingleLayerPerceptron slp(3, 1, 0.0, 0.1);
-  slp.train(applicants, correctAnswers, 5000);
+  slp.train(applicants, correctAnswers);
 
-  std::vector<double> applicant = { 0.3, 0.4, 0.4 };
+  std::vector<double> applicant = {0.4, 0.4, 0.4};
   double sideOfLine = slp.sideOfLineForPoint(applicant);
 
   if (sideOfLine > 0.5)
