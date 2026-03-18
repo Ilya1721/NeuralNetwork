@@ -6,7 +6,7 @@
 
 namespace
 {
-  const double MIN_IMPROVEMENT = 1e-5;
+  const double MIN_IMPROVEMENT = 1e-4;
 
   double deviation(double sideOfLine, double correctAnswer)
   {
@@ -58,44 +58,5 @@ void ImprovementWatcher::update(
   else
   {
     ++mPassesWithoutImprovement;
-  }
-}
-
-MLPImprovementWatcher::MLPImprovementWatcher(int passesWithoutImprovementToPass)
-  : ImprovementWatcher(passesWithoutImprovementToPass)
-{
-}
-
-void MLPImprovementWatcher::update(
-  const std::vector<std::vector<double>>& pointsEachClassProbability,
-  const std::vector<std::vector<double>>& pointsEachClassCorrectProbability
-)
-{
-  std::vector<double> predictions;
-  std::vector<double> correctAnswers;
-  convertMLPToSLP(
-    pointsEachClassProbability, pointsEachClassCorrectProbability, predictions,
-    correctAnswers
-  );
-  ImprovementWatcher::update(predictions, correctAnswers);
-}
-
-void MLPImprovementWatcher::convertMLPToSLP(
-  const std::vector<std::vector<double>>& pointsEachClassProbability,
-  const std::vector<std::vector<double>>& pointsEachClassCorrectProbability,
-  std::vector<double>& predictions,
-  std::vector<double>& correctAnswers
-)
-{
-  for (size_t pointIdx = 0; pointIdx < pointsEachClassProbability.size(); ++pointIdx)
-  {
-    const auto& eachClassCorrectProbability = pointsEachClassCorrectProbability[pointIdx];
-    const auto& maxIt = std::max_element(
-      eachClassCorrectProbability.begin(), eachClassCorrectProbability.end()
-    );
-    const auto correctClassIdx =
-      std::distance(eachClassCorrectProbability.begin(), maxIt);
-    correctAnswers.push_back(*maxIt);
-    predictions.push_back(pointsEachClassProbability[pointIdx][correctClassIdx]);
   }
 }

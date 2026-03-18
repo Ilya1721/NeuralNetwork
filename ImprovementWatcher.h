@@ -17,22 +17,3 @@ class ImprovementWatcher
   int mPassesWithoutImprovement;
   const int mPassesWithoutImprovementToStop;
 };
-
-class MLPImprovementWatcher : public ImprovementWatcher
-{
- public:
-  MLPImprovementWatcher(int passesWithoutImprovementToStop);
-
-  void update(
-    const std::vector<std::vector<double>>& pointsEachClassProbability,
-    const std::vector<std::vector<double>>& pointsEachClassCorrectProbability
-  );
-
- private:
-  void convertMLPToSLP(
-    const std::vector<std::vector<double>>& pointsEachClassProbability,
-    const std::vector<std::vector<double>>& pointsEachClassCorrectProbability,
-    std::vector<double>& predictions,
-    std::vector<double>& correctAnswers
-  );
-};

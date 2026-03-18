@@ -1,34 +1,28 @@
+#include <filesystem>
 #include <iostream>
 
-#include "SingleLayerPerceptron.h"
+#include "Dataset.h"
+#include "MultipleLayerPerceptron.h"
+
+namespace fs = std::filesystem;
 
 int main()
 {
-  // [income, debt, creditScore]
-  std::vector<std::vector<double>> applicants = {
-    {0.2, 0.8, 0.3},  // low income, high debt -> reject
-    {0.9, 0.2, 0.4},  // high income, low debt -> approve
-    {0.3, 0.4, 0.9},  // great credit score -> approve
-    {0.4, 0.7, 0.2},  // bad profile -> reject
-    {0.8, 0.3, 0.6},  // good profile -> approve
-    {0.3, 0.8, 0.8}   // high debt even with good score -> reject
-  };
-  std::vector<double> correctAnswers = {0, 1, 1, 0, 1, 0};
-
-  SingleLayerPerceptron slp(3, 1, 0.0, 0.1);
-  slp.train(applicants, correctAnswers);
-
-  std::vector<double> applicant = {0.4, 0.4, 0.4};
-  double sideOfLine = slp.sideOfLineForPoint(applicant);
-
-  if (sideOfLine > 0.5)
+  auto root = fs::current_path() / "ThirdParty" / "mnist-png";
+  auto trainFolder = root / "train";
+  auto samples = loadDigitsDataset(trainFolder.string(), 10);
+  std::vector<std::vector<double>> inputs, targets;
+  for (const auto& [input, target] : samples)
   {
-    std::cout << "Loan APPROVED\n";
+    inputs.push_back(input);
+    targets.push_back(target);
   }
-  else
-  {
-    std::cout << "Loan REJECTED\n";
-  }
+
+  MultipleLayerPerceptron mlp(inputs[0].size(), targets[0].size(), 3, 32, 0.0, 0.01);
+  mlp.train(inputs, targets);
+
+  auto testFolder = root / "test";
+  test(mlp, testFolder.string(), 3);
 
   return 0;
 }

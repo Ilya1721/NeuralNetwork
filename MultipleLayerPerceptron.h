@@ -4,6 +4,8 @@
 
 #include "Perceptron.h"
 
+int classProbabilitiesToIndex(const std::vector<double>& eachClassProbability);
+
 class MLPHiddenLayer
 {
  public:
@@ -23,7 +25,9 @@ class MLPHiddenLayer
     size_t currLayerIdx
   ) const;
 
-  void updateSlopeAndBias(const std::vector<double>& point, const std::vector<double>& slopeChanges);
+  void updateSlopeAndBias(
+    const std::vector<double>& point, const std::vector<double>& slopeChanges
+  );
 
  private:
   double slopesAffectedDeviation(
@@ -40,7 +44,7 @@ class MultipleLayerPerceptron
   MultipleLayerPerceptron(
     size_t inputDimension,
     size_t classesAmount,
-    size_t layersAmount,
+    size_t hiddenLayersAmount,
     size_t perceptronsInFirstLayer,
     double yIntercept,
     double lineChangeRate
@@ -54,10 +58,14 @@ class MultipleLayerPerceptron
   );
 
  private:
-  std::vector<double> eachClassProbability(const std::vector<double>& point) const;
+  std::vector<double> eachClassProbability(
+    const std::vector<std::vector<double>>& layersSidesOfLines
+  ) const;
   std::vector<double> outputLayerEachClassDeviation(
     const std::vector<double>& eachClassProbability,
     const std::vector<double>& eachClassCorrectProbability
+  ) const;
+  std::vector<std::vector<double>> layersSidesOfLines(const std::vector<double>& point
   ) const;
 
  private:

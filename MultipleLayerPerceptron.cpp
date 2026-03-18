@@ -36,7 +36,33 @@ namespace
 
     return probabilities;
   }
+
+  void convertMLPToSLP(
+    const std::vector<std::vector<double>>& pointsEachClassProbability,
+    const std::vector<std::vector<double>>& pointsEachClassCorrectProbability,
+    std::vector<double>& predictions,
+    std::vector<double>& correctAnswers
+  )
+  {
+    for (size_t pointIdx = 0; pointIdx < pointsEachClassProbability.size(); ++pointIdx)
+    {
+      const auto& eachClassCorrectProbability =
+        pointsEachClassCorrectProbability[pointIdx];
+      const auto correctClassIdx = classProbabilitiesToIndex(eachClassCorrectProbability);
+      correctAnswers.push_back(eachClassCorrectProbability[correctClassIdx]);
+      predictions.push_back(pointsEachClassProbability[pointIdx][correctClassIdx]);
+    }
+  }
 }  // namespace
+
+int classProbabilitiesToIndex(const std::vector<double>& eachClassProbability)
+{
+  auto maxProbabilityIt =
+    std::max_element(eachClassProbability.begin(), eachClassProbability.end());
+  auto classIndex = std::distance(eachClassProbability.begin(), maxProbabilityIt);
+
+  return classIndex;
+}
 
 MLPHiddenLayer::MLPHiddenLayer(
   size_t inputDimension,
@@ -74,7 +100,8 @@ std::vector<double> MLPHiddenLayer::eachPerceptronSlopeChange(
   std::vector<double> slopeChanges;
   for (size_t perceptronIdx = 0; perceptronIdx < mPerceptrons.size(); ++perceptronIdx)
   {
-    auto prevLayerDeviation = slopesAffectedDeviation(prevLayerDeviations, currLayerIdx);
+    auto prevLayerDeviation =
+      prevLayer.slopesAffectedDeviation(prevLayerDeviations, currLayerIdx);
     auto prevLayerSideOfLine = prevLayerSidesOfLines[perceptronIdx];
     auto slopeChange = prevLayerDeviation * sigmoidDerivative(prevLayerSideOfLine);
     slopeChanges.push_back(slopeChange);
@@ -110,45 +137,40 @@ void MLPHiddenLayer::updateSlopeAndBias(
 MultipleLayerPerceptron::MultipleLayerPerceptron(
   size_t inputDimension,
   size_t classesAmount,
-  size_t layersAmount,
+  size_t hiddenLayersAmount,
   size_t perceptronsInFirstLayer,
   double yIntercept,
   double lineChangeRate
 )
 {
-  for (size_t layerIdx = 0, pow = 0; layerIdx < layersAmount; ++layerIdx, ++pow)
+  auto prevLayerPerceptrons = inputDimension;
+  auto currLayerPerceptrons = perceptronsInFirstLayer;
+  for (size_t layerIdx = 0, pow = 1; layerIdx < hiddenLayersAmount; ++layerIdx, ++pow)
   {
-    auto perceptronsAmount = perceptronsInFirstLayer / std::pow(2, pow);
     mLayers.emplace_back(
-      inputDimension, perceptronsAmount, yIntercept, lineChangeRate, sigmoid
+      prevLayerPerceptrons, currLayerPerceptrons, yIntercept, lineChangeRate, sigmoid
     );
+    prevLayerPerceptrons = currLayerPerceptrons;
+    currLayerPerceptrons = perceptronsInFirstLayer / std::pow(2, pow);
   }
   mLayers.emplace_back(
-    inputDimension, classesAmount, yIntercept, lineChangeRate, sigmoid
+    prevLayerPerceptrons, classesAmount, yIntercept, lineChangeRate, sigmoid
   );
 }
 
 int MultipleLayerPerceptron::classOf(const std::vector<double>& point) const
 {
-  auto eachClassProbability = this->eachClassProbability(point);
-  auto maxProbabilityIt =
-    std::max_element(eachClassProbability.begin(), eachClassProbability.end());
-  auto classIndex = std::distance(eachClassProbability.begin(), maxProbabilityIt);
-
-  return classIndex;
+  auto layersSidesOfLines = this->layersSidesOfLines(point);
+  auto eachClassProbability = this->eachClassProbability(layersSidesOfLines);
+  return classProbabilitiesToIndex(eachClassProbability);
 }
 
 std::vector<double> MultipleLayerPerceptron::eachClassProbability(
-  const std::vector<double>& point
+  const std::vector<std::vector<double>>& layersSidesOfLines
 ) const
 {
-  std::vector<double> sidesOfLines = point;
-  for (const auto& layer : mLayers)
-  {
-    sidesOfLines = std::move(layer.sidesOfLinesForPoint(point));
-  }
-
-  return scoresToProbabilities(sidesOfLines);
+  const auto& outputLayerSidesOfLines = layersSidesOfLines.back();
+  return scoresToProbabilities(outputLayerSidesOfLines);
 }
 
 std::vector<double> MultipleLayerPerceptron::outputLayerEachClassDeviation(
@@ -167,33 +189,42 @@ std::vector<double> MultipleLayerPerceptron::outputLayerEachClassDeviation(
   return deviations;
 }
 
+std::vector<std::vector<double>> MultipleLayerPerceptron::layersSidesOfLines(
+  const std::vector<double>& point
+) const
+{
+  std::vector<std::vector<double>> layersSidesOfLines = { point };
+  for (const auto& layer : mLayers)
+  {
+    layersSidesOfLines.emplace_back(
+      layer.sidesOfLinesForPoint(layersSidesOfLines.back())
+    );
+  }
+
+  return layersSidesOfLines;
+}
+
 void MultipleLayerPerceptron::train(
   const std::vector<std::vector<double>>& points,
   const std::vector<std::vector<double>>& pointsEachClassCorrectProbability
 )
 {
-  MLPImprovementWatcher watcher(10);
+  ImprovementWatcher watcher(10);
   while (!watcher.improvementStopped())
   {
+    std::vector<std::vector<double>> pointsEachClassProbability;
     for (size_t pointIdx = 0; pointIdx < points.size(); ++pointIdx)
     {
-      std::vector<std::vector<double>> layersSidesOfLines = {points[pointIdx]};
-      for (const auto& layer : mLayers)
-      {
-        layersSidesOfLines.emplace_back(
-          layer.sidesOfLinesForPoint(layersSidesOfLines.back())
-        );
-      }
-
-      const auto& outputLayerSidesOfLines = layersSidesOfLines.back();
-      const auto& eachClassProbability = scoresToProbabilities(outputLayerSidesOfLines);
+      auto layersSidesOfLines = this->layersSidesOfLines(points[pointIdx]);
+      const auto& eachClassProbability = this->eachClassProbability(layersSidesOfLines);
+      pointsEachClassProbability.push_back(eachClassProbability);
       std::vector<std::vector<double>> layersPerceptronsSlopeChange(mLayers.size());
       const auto& eachClassCorrectProbability =
         pointsEachClassCorrectProbability[pointIdx];
       layersPerceptronsSlopeChange.back() =
         outputLayerEachClassDeviation(eachClassProbability, eachClassCorrectProbability);
 
-      for (long long layerIdx = mLayers.size() - 1; layerIdx >= 0; --layerIdx)
+      for (long long layerIdx = mLayers.size() - 2; layerIdx >= 0; --layerIdx)
       {
         auto prevLayerIdx = layerIdx + 1;
         const auto& currentLayer = mLayers[layerIdx];
@@ -211,5 +242,11 @@ void MultipleLayerPerceptron::train(
         );
       }
     }
+    std::vector<double> predictions, correctAnswers;
+    convertMLPToSLP(
+      pointsEachClassProbability, pointsEachClassCorrectProbability, predictions,
+      correctAnswers
+    );
+    watcher.update(predictions, correctAnswers);
   }
 }
