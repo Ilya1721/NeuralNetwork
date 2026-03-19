@@ -20,7 +20,6 @@ namespace
 SLPHiddenLayer::SLPHiddenLayer(
   size_t inputDimension,
   size_t outputDimension,
-  double yIntercept,
   double lineChangeRate,
   const std::function<double(double)>& sideOfLineFunc
 )
@@ -28,7 +27,7 @@ SLPHiddenLayer::SLPHiddenLayer(
   auto perceptronsCount = (2.0 / 3.0) * inputDimension + outputDimension;
   for (size_t i = 0; i < perceptronsCount; ++i)
   {
-    mPerceptrons.emplace_back(inputDimension, yIntercept, lineChangeRate, sideOfLineFunc);
+    mPerceptrons.emplace_back(inputDimension, lineChangeRate, sideOfLineFunc);
   }
 }
 
@@ -61,10 +60,10 @@ void SLPHiddenLayer::backpropagate(
 }
 
 SingleLayerPerceptron::SingleLayerPerceptron(
-  size_t inputDimension, size_t outputDimension, double yIntercept, double lineChangeRate
+  size_t inputDimension, size_t outputDimension, double lineChangeRate
 )
-  : mLayer(inputDimension, outputDimension, yIntercept, lineChangeRate, sigmoid),
-    mOutput(inputDimension, yIntercept, lineChangeRate, sigmoid)
+  : mLayer(inputDimension, outputDimension, lineChangeRate, sigmoid),
+    mOutput(inputDimension, lineChangeRate, sigmoid)
 {
 }
 

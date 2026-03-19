@@ -1,5 +1,8 @@
 #include "Perceptron.h"
 
+#include <cmath>
+#include <random>
+
 namespace
 {
   double dotProduct(const std::vector<double>& left, const std::vector<double>& right)
@@ -16,15 +19,14 @@ namespace
 
 Perceptron::Perceptron(
   size_t pointCoordsCount,
-  double yIntercept,
   double lineChangeRate,
   const std::function<double(double)>& sideOfLineFunc
 )
-  : mYIntercept(yIntercept),
+  : mYIntercept(),
     mLineChangeRate(lineChangeRate),
     mSideOfLineFunc(sideOfLineFunc)
 {
-  mSlopes.resize(pointCoordsCount);
+  initSlopes(pointCoordsCount);
 }
 
 double Perceptron::sideOfLineForPoint(const std::vector<double>& point) const
@@ -70,4 +72,18 @@ void Perceptron::updateSlopeAndBias(const std::vector<double>& point, double slo
     mSlopes[slopeIdx] += mLineChangeRate * slopeChange * point[slopeIdx];
   }
   mYIntercept += mLineChangeRate * slopeChange;
+}
+
+void Perceptron::initSlopes(size_t inputDimension)
+{
+  double limit = std::sqrt(1.0 / inputDimension);
+  static std::random_device randomDevice;
+  static std::mt19937 randomGenerator(randomDevice());
+  std::uniform_real_distribution<double> distribution(-limit, limit);
+
+  mSlopes.resize(inputDimension);
+  for (auto& slope : mSlopes)
+  {
+    slope = distribution(randomGenerator);
+  }
 }

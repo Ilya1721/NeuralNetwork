@@ -8,7 +8,6 @@ class Perceptron
  public:
   Perceptron(
     size_t pointCoordsCount,
-    double yIntercept,
     double lineChangeRate,
     const std::function<double(double)>& sideOfLineFunc
   );
@@ -22,6 +21,9 @@ class Perceptron
     int passesCount
   );
   void updateSlopeAndBias(const std::vector<double>& point, double slopeChange);
+
+private:
+  void initSlopes(size_t inputDimension);
 
  private:
   std::vector<double> mSlopes;

@@ -6,7 +6,7 @@
 
 namespace
 {
-  const double MIN_IMPROVEMENT = 1e-4;
+  const double MIN_IMPROVEMENT = 1e-5;
 
   double deviation(double sideOfLine, double correctAnswer)
   {

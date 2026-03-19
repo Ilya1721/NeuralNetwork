@@ -1,5 +1,4 @@
 #include <filesystem>
-#include <iostream>
 
 #include "Dataset.h"
 #include "MultipleLayerPerceptron.h"
@@ -10,7 +9,7 @@ int main()
 {
   auto root = fs::current_path() / "ThirdParty" / "mnist-png";
   auto trainFolder = root / "train";
-  auto samples = loadDigitsDataset(trainFolder.string(), 10);
+  auto samples = loadDigitsDataset(trainFolder.string(), 100);
   std::vector<std::vector<double>> inputs, targets;
   for (const auto& [input, target] : samples)
   {
@@ -18,11 +17,11 @@ int main()
     targets.push_back(target);
   }
 
-  MultipleLayerPerceptron mlp(inputs[0].size(), targets[0].size(), 3, 32, 0.0, 0.01);
+  MultipleLayerPerceptron mlp(inputs[0].size(), targets[0].size(), 3, 32, 0.01);
   mlp.train(inputs, targets);
 
   auto testFolder = root / "test";
-  test(mlp, testFolder.string(), 3);
+  test(mlp, testFolder.string(), 1);
 
   return 0;
 }

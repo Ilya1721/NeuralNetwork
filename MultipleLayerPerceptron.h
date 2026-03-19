@@ -12,17 +12,15 @@ class MLPHiddenLayer
   MLPHiddenLayer(
     size_t inputDimension,
     size_t perceptronsAmount,
-    double yIntercept,
     double lineChangeRate,
     const std::function<double(double)>& sideOfLineFunc
   );
 
   std::vector<double> sidesOfLinesForPoint(const std::vector<double>& point) const;
   std::vector<double> eachPerceptronSlopeChange(
-    const MLPHiddenLayer& prevLayer,
-    const std::vector<double>& prevLayerDeviations,
-    const std::vector<double>& prevLayerSidesOfLines,
-    size_t currLayerIdx
+    const MLPHiddenLayer& nextLayer,
+    const std::vector<double>& nextLayerDeviations,
+    const std::vector<double>& currLayerSidesOfLines
   ) const;
 
   void updateSlopeAndBias(
@@ -31,7 +29,7 @@ class MLPHiddenLayer
 
  private:
   double slopesAffectedDeviation(
-    const std::vector<double>& eachPerceptronDeviation, size_t layerIdx
+    const std::vector<double>& nextLayerDeviations, size_t currPerceptronIdx
   ) const;
 
  private:
@@ -46,7 +44,6 @@ class MultipleLayerPerceptron
     size_t classesAmount,
     size_t hiddenLayersAmount,
     size_t perceptronsInFirstLayer,
-    double yIntercept,
     double lineChangeRate
   );
 

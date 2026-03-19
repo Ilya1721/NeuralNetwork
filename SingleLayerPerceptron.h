@@ -8,7 +8,6 @@ class SLPHiddenLayer
   SLPHiddenLayer(
     size_t inputDimension,
     size_t outputDimension,
-    double yIntercept,
     double lineChangeRate,
     const std::function<double(double)>& sideOfLineFunc
   );
@@ -31,7 +30,6 @@ class SingleLayerPerceptron
   SingleLayerPerceptron(
     size_t inputDimension,
     size_t outputDimension,
-    double yIntercept,
     double lineChangeRate
   );
 
