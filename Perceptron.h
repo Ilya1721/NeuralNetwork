@@ -12,7 +12,9 @@ class Perceptron
     const std::function<double(double)>& sideOfLineFunc
   );
 
-  double sideOfLineForPoint(const std::vector<double>& point) const;
+  double sideOfLineForPoint(
+    const std::vector<double>& point, bool useSideOfLineFunc = true
+  ) const;
   const std::vector<double>& getSlopes() const;
 
   void train(
@@ -22,7 +24,7 @@ class Perceptron
   );
   void updateSlopeAndBias(const std::vector<double>& point, double slopeChange);
 
-private:
+ private:
   void initSlopes(size_t inputDimension);
 
  private:

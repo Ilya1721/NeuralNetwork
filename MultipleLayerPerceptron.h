@@ -16,7 +16,9 @@ class MLPHiddenLayer
     const std::function<double(double)>& sideOfLineFunc
   );
 
-  std::vector<double> sidesOfLinesForPoint(const std::vector<double>& point) const;
+  std::vector<double> sidesOfLinesForPoint(
+    const std::vector<double>& point, bool useSideOfLineFunc
+  ) const;
   std::vector<double> eachPerceptronSlopeChange(
     const MLPHiddenLayer& nextLayer,
     const std::vector<double>& nextLayerDeviations,
@@ -58,7 +60,7 @@ class MultipleLayerPerceptron
   std::vector<double> eachClassProbability(
     const std::vector<std::vector<double>>& layersSidesOfLines
   ) const;
-  std::vector<double> outputLayerEachClassDeviation(
+  std::vector<double> outputLayerSlopeChanges(
     const std::vector<double>& eachClassProbability,
     const std::vector<double>& eachClassCorrectProbability
   ) const;

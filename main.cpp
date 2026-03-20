@@ -9,7 +9,7 @@ int main()
 {
   auto root = fs::current_path() / "ThirdParty" / "mnist-png";
   auto trainFolder = root / "train";
-  auto samples = loadDigitsDataset(trainFolder.string(), 100);
+  auto samples = loadDigitsDataset(trainFolder.string(), 500);
   std::vector<std::vector<double>> inputs, targets;
   for (const auto& [input, target] : samples)
   {
@@ -17,7 +17,7 @@ int main()
     targets.push_back(target);
   }
 
-  MultipleLayerPerceptron mlp(inputs[0].size(), targets[0].size(), 3, 32, 0.01);
+  MultipleLayerPerceptron mlp(inputs[0].size(), targets[0].size(), 2, 128, 0.01);
   mlp.train(inputs, targets);
 
   auto testFolder = root / "test";

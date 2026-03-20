@@ -22,20 +22,20 @@ Perceptron::Perceptron(
   double lineChangeRate,
   const std::function<double(double)>& sideOfLineFunc
 )
-  : mYIntercept(),
-    mLineChangeRate(lineChangeRate),
-    mSideOfLineFunc(sideOfLineFunc)
+  : mYIntercept(), mLineChangeRate(lineChangeRate), mSideOfLineFunc(sideOfLineFunc)
 {
   initSlopes(pointCoordsCount);
 }
 
-double Perceptron::sideOfLineForPoint(const std::vector<double>& point) const
+double Perceptron::sideOfLineForPoint(
+  const std::vector<double>& point, bool useSideOfLineFunc
+) const
 {
   auto kx = dotProduct(point, mSlopes);
   auto b = mYIntercept;
   auto y = kx + b;
 
-  return mSideOfLineFunc(y);
+  return useSideOfLineFunc ? mSideOfLineFunc(y) : y;
 }
 
 const std::vector<double>& Perceptron::getSlopes() const

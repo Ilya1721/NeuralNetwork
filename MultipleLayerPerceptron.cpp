@@ -77,13 +77,14 @@ MLPHiddenLayer::MLPHiddenLayer(
   }
 }
 
-std::vector<double> MLPHiddenLayer::sidesOfLinesForPoint(const std::vector<double>& point
+std::vector<double> MLPHiddenLayer::sidesOfLinesForPoint(
+  const std::vector<double>& point, bool useSideOfLineFunc
 ) const
 {
   std::vector<double> sidesOfLines;
   for (const auto& perceptron : mPerceptrons)
   {
-    sidesOfLines.emplace_back(perceptron.sideOfLineForPoint(point));
+    sidesOfLines.emplace_back(perceptron.sideOfLineForPoint(point, useSideOfLineFunc));
   }
 
   return sidesOfLines;
@@ -168,20 +169,20 @@ std::vector<double> MultipleLayerPerceptron::eachClassProbability(
   return scoresToProbabilities(outputLayerSidesOfLines);
 }
 
-std::vector<double> MultipleLayerPerceptron::outputLayerEachClassDeviation(
+std::vector<double> MultipleLayerPerceptron::outputLayerSlopeChanges(
   const std::vector<double>& eachClassProbability,
   const std::vector<double>& eachClassCorrectProbability
 ) const
 {
-  std::vector<double> deviations;
+  std::vector<double> slopeChanges;
   for (size_t probIdx = 0; probIdx < eachClassProbability.size(); ++probIdx)
   {
-    deviations.push_back(
+    slopeChanges.push_back(
       eachClassCorrectProbability[probIdx] - eachClassProbability[probIdx]
     );
   }
 
-  return deviations;
+  return slopeChanges;
 }
 
 std::vector<std::vector<double>> MultipleLayerPerceptron::layersSidesOfLines(
@@ -189,11 +190,15 @@ std::vector<std::vector<double>> MultipleLayerPerceptron::layersSidesOfLines(
 ) const
 {
   std::vector<std::vector<double>> layersSidesOfLines = {point};
-  for (const auto& layer : mLayers)
+  for (size_t layerIdx = 0; layerIdx < mLayers.size() - 1; ++layerIdx)
   {
-    layersSidesOfLines.emplace_back(layer.sidesOfLinesForPoint(layersSidesOfLines.back())
+    layersSidesOfLines.emplace_back(
+      mLayers[layerIdx].sidesOfLinesForPoint(layersSidesOfLines.back(), true)
     );
   }
+  layersSidesOfLines.emplace_back(
+    mLayers.back().sidesOfLinesForPoint(layersSidesOfLines.back(), false)
+  );
 
   return layersSidesOfLines;
 }
@@ -205,7 +210,7 @@ void MultipleLayerPerceptron::train(
 {
   ImprovementWatcher watcher(10);
   int counter = 0;
-  while (/*!watcher.improvementStopped()*/ counter < 50)
+  while (/*!watcher.improvementStopped()*/ counter < 200)
   {
     ++counter;
     std::vector<std::vector<double>> pointsEachClassProbability;
@@ -218,7 +223,7 @@ void MultipleLayerPerceptron::train(
       const auto& eachClassCorrectProbability =
         pointsEachClassCorrectProbability[pointIdx];
       layersPerceptronsSlopeChange.back() =
-        outputLayerEachClassDeviation(eachClassProbability, eachClassCorrectProbability);
+        outputLayerSlopeChanges(eachClassProbability, eachClassCorrectProbability);
 
       for (long long layerIdx = mLayers.size() - 2; layerIdx >= 0; --layerIdx)
       {
