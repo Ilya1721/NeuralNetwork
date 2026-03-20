@@ -4,6 +4,12 @@
 
 #include "Perceptron.h"
 
+struct Sample
+{
+  std::vector<double> input;
+  std::vector<double> target;
+};
+
 int classProbabilitiesToIndex(const std::vector<double>& eachClassProbability);
 
 class MLPHiddenLayer
@@ -51,10 +57,7 @@ class MultipleLayerPerceptron
 
   int classOf(const std::vector<double>& point) const;
 
-  void train(
-    const std::vector<std::vector<double>>& points,
-    const std::vector<std::vector<double>>& pointsEachClassCorrectProbability
-  );
+  void train(const std::vector<Sample>& originalSamples);
 
  private:
   std::vector<double> eachClassProbability(

@@ -78,7 +78,7 @@ void SingleLayerPerceptron::train(
   const std::vector<double>& correctSidesOfLine
 )
 {
-  ImprovementWatcher watcher(10);
+  SLPImprovementWatcher watcher(10);
   while (!watcher.improvementStopped())
   {
     std::vector<double> finalSidesOfLine;

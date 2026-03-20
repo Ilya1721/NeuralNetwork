@@ -5,12 +5,6 @@
 
 #include "MultipleLayerPerceptron.h"
 
-struct Sample
-{
-  std::vector<double> input;
-  std::vector<double> target;
-};
-
 std::vector<Sample> loadDigitsDataset(
   const std::string& root, int maxImagesPerClass = 20
 );

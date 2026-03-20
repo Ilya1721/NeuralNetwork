@@ -1,6 +1,9 @@
 #include "MultipleLayerPerceptron.h"
 
+#include <algorithm>
 #include <cmath>
+#include <random>
+#include <iostream>
 
 #include "ImprovementWatcher.h"
 
@@ -35,23 +38,6 @@ namespace
     }
 
     return probabilities;
-  }
-
-  void convertMLPToSLP(
-    const std::vector<std::vector<double>>& pointsEachClassProbability,
-    const std::vector<std::vector<double>>& pointsEachClassCorrectProbability,
-    std::vector<double>& predictions,
-    std::vector<double>& correctAnswers
-  )
-  {
-    for (size_t pointIdx = 0; pointIdx < pointsEachClassProbability.size(); ++pointIdx)
-    {
-      const auto& eachClassCorrectProbability =
-        pointsEachClassCorrectProbability[pointIdx];
-      const auto correctClassIdx = classProbabilitiesToIndex(eachClassCorrectProbability);
-      correctAnswers.push_back(eachClassCorrectProbability[correctClassIdx]);
-      predictions.push_back(pointsEachClassProbability[pointIdx][correctClassIdx]);
-    }
   }
 }  // namespace
 
@@ -203,27 +189,27 @@ std::vector<std::vector<double>> MultipleLayerPerceptron::layersSidesOfLines(
   return layersSidesOfLines;
 }
 
-void MultipleLayerPerceptron::train(
-  const std::vector<std::vector<double>>& points,
-  const std::vector<std::vector<double>>& pointsEachClassCorrectProbability
-)
+void MultipleLayerPerceptron::train(const std::vector<Sample>& originalSamples)
 {
-  ImprovementWatcher watcher(10);
+  std::mt19937 randomNumberGenerator(std::random_device {}());
+  std::vector<Sample> samples = originalSamples;
+  MLPImprovementWatcher watcher(5);
   int counter = 0;
-  while (/*!watcher.improvementStopped()*/ counter < 200)
+  while (!watcher.improvementStopped())
   {
     ++counter;
+    std::shuffle(samples.begin(), samples.end(), randomNumberGenerator);
     std::vector<std::vector<double>> pointsEachClassProbability;
-    for (size_t pointIdx = 0; pointIdx < points.size(); ++pointIdx)
+    std::vector<std::vector<double>> pointsEachClassCorrectProbability;
+    for (const auto& [point, eachClassCorrectProbability] : samples)
     {
-      auto layersSidesOfLines = this->layersSidesOfLines(points[pointIdx]);
+      auto layersSidesOfLines = this->layersSidesOfLines(point);
       const auto& eachClassProbability = this->eachClassProbability(layersSidesOfLines);
-      pointsEachClassProbability.push_back(eachClassProbability);
       std::vector<std::vector<double>> layersPerceptronsSlopeChange(mLayers.size());
-      const auto& eachClassCorrectProbability =
-        pointsEachClassCorrectProbability[pointIdx];
       layersPerceptronsSlopeChange.back() =
         outputLayerSlopeChanges(eachClassProbability, eachClassCorrectProbability);
+      pointsEachClassProbability.push_back(eachClassProbability);
+      pointsEachClassCorrectProbability.push_back(eachClassCorrectProbability);
 
       for (long long layerIdx = mLayers.size() - 2; layerIdx >= 0; --layerIdx)
       {
@@ -243,12 +229,8 @@ void MultipleLayerPerceptron::train(
         );
       }
     }
-    std::vector<double> predictions, correctAnswers;
-    convertMLPToSLP(
-      pointsEachClassProbability, pointsEachClassCorrectProbability, predictions,
-      correctAnswers
-    );
-    watcher.update(predictions, correctAnswers);
+    watcher.update(pointsEachClassProbability, pointsEachClassCorrectProbability);
   }
   auto t = 2 + 2;
+  std::cout << "Counter = " << counter << std::endl;
 }
