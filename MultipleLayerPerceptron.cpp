@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cmath>
 #include <random>
-#include <iostream>
 
 #include "ImprovementWatcher.h"
 
@@ -194,10 +193,8 @@ void MultipleLayerPerceptron::train(const std::vector<Sample>& originalSamples)
   std::mt19937 randomNumberGenerator(std::random_device {}());
   std::vector<Sample> samples = originalSamples;
   MLPImprovementWatcher watcher(5);
-  int counter = 0;
   while (!watcher.improvementStopped())
   {
-    ++counter;
     std::shuffle(samples.begin(), samples.end(), randomNumberGenerator);
     std::vector<std::vector<double>> pointsEachClassProbability;
     std::vector<std::vector<double>> pointsEachClassCorrectProbability;
@@ -231,6 +228,4 @@ void MultipleLayerPerceptron::train(const std::vector<Sample>& originalSamples)
     }
     watcher.update(pointsEachClassProbability, pointsEachClassCorrectProbability);
   }
-  auto t = 2 + 2;
-  std::cout << "Counter = " << counter << std::endl;
 }
